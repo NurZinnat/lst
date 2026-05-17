@@ -1,0 +1,25 @@
+# Object files
+*.o
+
+# Qt moc generated files
+moc_*
+moc_predefs.h
+
+# Makefile (генерируется qmake)
+Makefile
+
+# Исполняемый файл
+basic_graph
+a.out
+
+# qmake stash
+.qmake.stash
+
+# IDE
+.vscode/
+.idea/
+
+# Резервные копии
+*~
+*.bak
+*.swp
