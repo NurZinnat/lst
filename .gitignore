@@ -10,6 +10,9 @@ Makefile
 
 # Исполняемый файл
 basic_graph
+fem_lsq
+fem_lsq_debug
+*.o
 a.out
 
 # qmake stash

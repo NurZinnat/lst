@@ -1,41 +1,29 @@
 #include "functions.h"
+
 #include <cmath>
 
-double f_0 (double) { return 1; }
-double f_1 (double x) { return x; }
-double f_2 (double x) { return x * x; }
-double f_3 (double x) { return x * x * x; }
-double f_4 (double x) { return x * x * x * x; }
-double f_5 (double x) { return exp (x); }
-double f_6 (double x) { return 1.0 / (25.0 * x * x + 1.0); }
+#include "fem_task.h"
 
-const char *
-get_func_name (int k)
+static double f0 (double, double) { return 1.; }
+static double f1 (double x, double) { return x; }
+static double f2 (double, double y) { return y; }
+static double f3 (double x, double y) { return x + y; }
+static double f4 (double x, double y) { return std::sqrt (x * x + y * y); }
+static double f5 (double x, double y) { return x * x + y * y; }
+static double f6 (double x, double y) { return std::exp (x * x - y * y); }
+static double f7 (double x, double y)
 {
-  switch (k)
-    {
-    case 0: return "f(x) = 1";
-    case 1: return "f(x) = x";
-    case 2: return "f(x) = x^2";
-    case 3: return "f(x) = x^3";
-    case 4: return "f(x) = x^4";
-    case 5: return "f(x) = e^x";
-    case 6: return "f(x) = 1/(25x^2 + 1)";
-    default: return "";
-    }
+  return 1. / (25. * (x * x + y * y) + 1.);
 }
 
-double (*get_func (int k)) (double)
+static BivariateFunction table[] = {f0, f1, f2, f3, f4, f5, f6, f7};
+
+bool function_catalog::is_valid_index (int index)
 {
-  switch (k)
-    {
-    case 0: return f_0;
-    case 1: return f_1;
-    case 2: return f_2;
-    case 3: return f_3;
-    case 4: return f_4;
-    case 5: return f_5;
-    case 6: return f_6;
-    default: return nullptr;
-    }
+  return index >= 0 && index <= MAX_FUNCTION_INDEX;
+}
+
+BivariateFunction function_catalog::select (int index)
+{
+  return table[index];
 }
