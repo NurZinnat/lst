@@ -187,20 +187,21 @@ synchronization_capture_time (size_t p, double *time_value)
   static pthread_cond_t output_count = PTHREAD_COND_INITIALIZER;
   static size_t input_number = 0;
   static size_t output_number = 0;
+  static double time = 0;
 
   pthread_mutex_lock (&mutex);
   input_number++;
   if (input_number >= p)
     {
       extern double GetTime ();
-      *time_value = GetTime ();
+      time = GetTime ();
       output_number = 0;
       pthread_cond_broadcast (&input_count);
     }
   else
     while (input_number < p)
       pthread_cond_wait (&input_count, &mutex);
-
+  *time_value = time;
   output_number++;
   if (output_number >= p)
     {

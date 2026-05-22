@@ -6,15 +6,16 @@
 #include "errors.h"
 #include "mesh_index.h"
 #include "rhs_builder.h"
-#include "synch.h"
 #include "solver_mr.h"
+#include "stdio.h"
+#include "synch.h"
 
 execution_status
-fem_core::init_fem_core (const domain &dom, int function_index, double tolerance,
-                         int max_iterations, size_t p, int *msr_index,
-                         double *msr_values, int msr_length, double *rhs,
-                         double *solution, double *residual, double *search,
-                         double *auxiliary)
+fem_core::init_fem_core (const domain &dom, int function_index,
+                         double tolerance, int max_iterations, size_t p,
+                         int *msr_index, double *msr_values, int msr_length,
+                         double *rhs, double *solution, double *residual,
+                         double *search, double *auxiliary)
 {
   domain_ = dom;
   tolerance_ = tolerance;
@@ -37,8 +38,8 @@ fem_core::worker_build_system (size_t thread_index)
   const int node_count = domain_.node_count ();
   int begin = 0;
   int end = 0;
-  mesh_index::thread_range (node_count, static_cast<int> (p_), static_cast<int> (thread_index),
-                           begin, end);
+  mesh_index::thread_range (node_count, static_cast<int> (p_),
+                            static_cast<int> (thread_index), begin, end);
 
   std::memset (rhs_ + begin, 0, (end - begin) * sizeof (double));
   std::memset (solution_ + begin, 0, (end - begin) * sizeof (double));
@@ -50,7 +51,8 @@ fem_core::worker_build_system (size_t thread_index)
 
   if (thread_index == 0)
     {
-      const int pattern_length = matrix_.finalize_pattern (domain_.nx (), domain_.ny ());
+      const int pattern_length
+          = matrix_.finalize_pattern (domain_.nx (), domain_.ny ());
       if (pattern_length != matrix_.length ())
         error = 1;
     }
@@ -81,8 +83,8 @@ fem_core::worker_build_system (size_t thread_index)
 
   const int iterations = min_residual_solver::solve_with_restarts (
       matrix_.values (), matrix_.index (), rhs_, solution_, residual_, search_,
-      auxiliary_, tolerance_, max_iterations_, node_count, static_cast<int> (p_),
-      static_cast<int> (thread_index));
+      auxiliary_, tolerance_, max_iterations_, node_count,
+      static_cast<int> (p_), static_cast<int> (thread_index));
 
   double build_end = 0.;
   synchronization_capture_time (p_, &build_end);
@@ -106,11 +108,14 @@ fem_core::worker_compute_errors (size_t thread_index)
   r1_ = error_norms::max_centroid (domain_, solution_, function_,
                                    static_cast<int> (p_),
                                    static_cast<int> (thread_index));
-  r2_ = error_norms::l1_centroid (domain_, solution_, function_, static_cast<int> (p_),
-                                 static_cast<int> (thread_index));
-  r3_ = error_norms::max_nodes (domain_, solution_, function_, static_cast<int> (p_),
-                                 static_cast<int> (thread_index));
-  r4_ = error_norms::l1_nodes (domain_, solution_, function_, static_cast<int> (p_),
+  r2_ = error_norms::l1_centroid (domain_, solution_, function_,
+                                  static_cast<int> (p_),
+                                  static_cast<int> (thread_index));
+  r3_ = error_norms::max_nodes (domain_, solution_, function_,
+                                static_cast<int> (p_),
+                                static_cast<int> (thread_index));
+  r4_ = error_norms::l1_nodes (domain_, solution_, function_,
+                               static_cast<int> (p_),
                                static_cast<int> (thread_index));
 
   double error_end = 0.;
